@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPath - Образовательная платформа</title>
+    
+    <!-- ПОДКЛЮЧЕНИЕ БИБЛИОТЕК -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS СТИЛИ -->
+    <style>
+        :root {
+            --emerald-primary: #0a7168;
+            --emerald-dark: #085c54;
+            --emerald-light: #14b8a6;
+            --gold-primary: #d4af37;
+            --gold-dark: #b8941f;
+            --gold-light: #f7e98e;
+            --gold-glow: #ffd700;
+            --beige-bg: #fef7ed;
+            --beige-card: #fff7ed;
+            --beige-light: #fffbeb;
+            --text-dark: #1c1917;
+            --text-medium: #44403c;
+            --text-light: #78716c;
+            --bg-gradient: linear-gradient(135deg, #fef7ed 0%, #fffbeb 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* АНИМАЦИЯ ПРИВЕТСТВИЯ */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--emerald-primary) 0%, var(--emerald-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            visibility: visible;
+            transition: all 1.5s ease-in-out;
+        }
+        
+        .welcome-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+        
+        .welcome-content {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .welcome-text {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+            transform: translateY(20px);
+        }
+        
+        .welcome-subtext {
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: var(--emerald-light);
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 1s forwards;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transform: translateY(20px);
+        }
+        
+        .gold-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--gold-glow);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 0 15px var(--gold-glow);
+            opacity: 0;
+        }
+        
+        /* АНИМАЦИИ */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% { 
+                transform: translateY(-30px) rotate(180deg);
+                opacity: 1;
+            }
+        }
+        
+        /* ШАПКА */
+        .header {
+            background: rgba(254, 247, 237, 0.95);
+            padding: 20px 0;
+            border-bottom: 2px solid var(--gold-primary);
+            box-shadow: 0 2px 20px rgba(212, 175, 55, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .language-selector {
+            position: relative;
+        }
+        
+        .lang-switcher {
+            position: relative;
+        }
+        
+        .lang-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--beige-card);
+            border: 2px solid var(--gold-primary);
+            border-radius: 12px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(10, 113, 104, 0.15);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .lang-trigger:hover {
+            background: rgba(10, 113, 104, 0.1);
+            border-color: var(--gold-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 113, 104, 0.25);
+        }
+        
+        .lang-trigger i {
+            font-size: 1.2rem;
+            color: var(--emerald-primary);
+        }
+        
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--beige-card);
+            border: 2px solid var(--gold-primary);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 160px;
+            box-shadow: 0 8px 25px rgba(10, 113, 104, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .lang-dropdown.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .lang-option:hover {
+            background: rgba(10, 113, 104, 0.1);
+            color: var(--emerald-primary);
+        }
+        
+        .lang-option.active {
+            background: var(--emerald-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(10, 113, 104, 0.3);
+        }
+        
+        /* ОСНОВНОЙ КОНТЕНТ */
+        .main-content {
+            flex: 1;
+            padding: 40px 0 60px;
+        }
+        
+        .content-layout {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        /* КРУГЛАЯ ФОТОГРАФИЯ */
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+        }
+        
+        .profile-image-container {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(10, 113, 104, 0.25);
+            border: 4px solid var(--gold-primary);
+            position: relative;
+            background: var(--beige-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-image-container::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-glow), var(--gold-primary));
+            z-index: -1;
+            animation: rotate 3s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .profile-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--emerald-light), var(--emerald-primary));
+            color: white;
+            font-size: 4rem;
+            border-radius: 50%;
+        }
+        
+        /* ИМЯ ПОД ФОТОГРАФИЕЙ */
+        .profile-name {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .profile-name h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--emerald-primary);
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(10, 113, 104, 0.2);
+        }
+        
+        .profile-name .title {
+            font-size: 1.1rem;
+            color: var(--text-medium);
+            font-weight: 500;
+        }
+        
+        /* ОПИСАНИЕ */
+        .cover-description {
+            background: var(--beige-card);
+            padding: 35px;
+            border-radius: 20px;
+            border: 3px solid var(--gold-primary);
+            box-shadow: 0 8px 30px rgba(10, 113, 104, 0.15);
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .cover-description::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-glow));
+            border-radius: 23px;
+            z-index: -1;
+        }
+        
+        .cover-text {
+            font-size: 17px;
+            line-height: 1.8;
+            color: var(--text-dark);
+            font-weight: 400;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* КНОПКИ */
+        .buttons-section {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .catalog-btn-large {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 22px 45px;
+            background: var(--emerald-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 3px solid var(--gold-primary);
+            box-shadow: 0 6px 25px rgba(10, 113, 104, 0.3);
+            min-width: 220px;
+            text-align: center;
+        }
+        
+        .catalog-btn-large:hover {
+            background: var(--emerald-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(10, 113, 104, 0.4);
+            border-color: var(--gold-glow);
+            color: white;
+        }
+        
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 35px;
+            background: var(--emerald-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid var(--gold-primary);
+            box-shadow: 0 4px 15px rgba(10, 113, 104, 0.3);
+        }
+        
+        .whatsapp-btn:hover {
+            background: var(--emerald-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 113, 104, 0.4);
+            border-color: var(--gold-glow);
+            color: white;
+        }
+        
+        /* ФУТЕР */
+        .footer {
+            background: var(--beige-card);
+            padding: 25px 0;
+            border-top: 2px solid var(--gold-primary);
+            text-align: center;
+            margin-top: auto;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 800px;
+            margin: 0 auto;
+            gap: 40px;
+        }
+        
+        .footer-info {
+            background: var(--beige-light);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--gold-primary);
+            text-align: left;
+            flex: 1;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .footer-brand {
+            background: var(--beige-light);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--gold-primary);
+            text-align: left;
+            flex: 1;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .info-block {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .info-value strong {
+            color: var(--emerald-primary);
+        }
+        
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--emerald-primary);
+            margin-bottom: 10px;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .author-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        
+        .author-text {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .author-name {
+            font-size: 13px;
+            color: var(--emerald-primary);
+            font-weight: 600;
+            margin-top: 4px;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        .copyright {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            font-size: 12px;
+            color: var(--text-light);
+            text-align: center;
+            font-family: 'Manrope', sans-serif;
+        }
+        
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 968px) {
+            .profile-image-container {
+                width: 240px;
+                height: 240px;
+            }
+            
+            .profile-name h1 {
+                font-size: 2rem;
+            }
+            
+            .catalog-btn-large {
+                padding: 20px 40px;
+                font-size: 16px;
+            }
+            
+            .welcome-text {
+                font-size: 2.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                justify-content: center;
+            }
+            
+            .profile-image-container {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .profile-name h1 {
+                font-size: 1.8rem;
+            }
+            
+            .profile-name .title {
+                font-size: 1rem;
+            }
+            
+            .cover-description {
+                margin: 0 15px;
+                padding: 25px 20px;
+            }
+            
+            .catalog-btn-large {
+                padding: 18px 35px;
+                font-size: 16px;
+                min-width: 200px;
+            }
+            
+            .main-content {
+                padding: 30px 0 40px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 20px;
+                margin: 0 15px;
+            }
+            
+            .footer-info, .footer-brand {
+                padding: 20px;
+            }
+            
+            .welcome-text {
+                font-size: 2rem;
+            }
+            
+            .welcome-subtext {
+                font-size: 1rem;
+            }
+            
+            .lang-trigger {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .lang-dropdown {
+                min-width: 140px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- АНИМАЦИЯ ПРИВЕТСТВИЯ -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="gold-particles" id="goldParticles"></div>
+        <div class="welcome-content">
+            <div class="welcome-text text-welcome">Добро пожаловать!</div>
+            <div class="welcome-subtext">Мы рады видеть вас на нашей платформе</div>
+        </div>
+    </div>
+
+    <!-- ШАПКА -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="language-selector">
+                    <div class="lang-switcher">
+                        <div class="lang-trigger" id="langTrigger">
+                            <i class="fas fa-globe"></i>
+                            <span class="text-lang">Русский</span>
+                        </div>
+                        <div class="lang-dropdown" id="langDropdown">
+                            <button class="lang-option" data-lang="kz">
+                                <span>Қазақша</span>
+                            </button>
+                            <button class="lang-option active" data-lang="ru">
+                                <span>Русский</span>
+                            </button>
+                            <button class="lang-option" data-lang="en">
+                                <span>English</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <main class="main-content">
+        <div class="container">
+            <div class="content-layout">
+                <!-- ПРОФИЛЬ С ФОТОГРАФИЕЙ -->
+                <div class="profile-section">
+                    <!-- КРУГЛАЯ ФОТОГРАФИЯ -->
+                    <div class="profile-image-container">
+                        <img src="https://i.ibb.co.com/9mnLvHX6/dana-jpg.jpg" alt="Дана Абдрахманова" class="profile-image" onerror="this.style.display='none'; document.getElementById('profilePlaceholder').style.display='flex';">
+                        <div class="profile-placeholder" id="profilePlaceholder" style="display: none;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- ИМЯ ПОД ФОТОГРАФИЕЙ -->
+                    <div class="profile-name">
+                        <h1 class="text-name">Дана Абдрахманова</h1>
+                        <div class="title text-title">Мастер осознанного скульптурного массажа лица</div>
+                    </div>
+                    
+                    <!-- ОПИСАНИЕ -->
+                    <div class="cover-description">
+                        <div class="cover-text text-cover">
+                            Я — Дана Абдрахманова. Многодетная мама, мастер осознанного скульптурного массажа лица и проводник женской трансформации. Помогаю женщинам находить внутреннюю опору, гармонию и наполнять свою жизнь любовью, чтобы в мире становилось больше счастливых детей.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- КНОПКИ -->
+                <div class="buttons-section">
+                    <!-- БОЛЬШАЯ КНОПКА КАТАЛОГ -->
+                    <a href="https://silkway777.com/" 
+                       class="catalog-btn-large" target="_blank">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="text-catalog-btn">Каталог</span>
+                    </a>
+                    
+                    <!-- КНОПКА WHATSAPP -->
+                    <a href="https://wa.me/87771650378" class="whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                        <span class="text-whatsapp">WhatsApp</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ФУТЕР -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- БРЕНД И АВТОР -->
+                <div class="footer-brand">
+                    <div class="brand-name text-brand">@EduPath</div>
+                    <div class="info-value text-description">Образовательная платформа</div>
+                    <div class="author-info">
+                        <div class="author-text text-author">Автор сайта</div>
+                        <div class="author-name text-author-name">@ERZHIGIT MANSUR</div>
+                    </div>
+                </div>
+                
+                <!-- ИНФОРМАЦИЯ О МЕСТОПОЛОЖЕНИИ -->
+                <div class="footer-info">
+                    <div class="info-block">
+                        <div class="info-label">Страна</div>
+                        <div class="info-value"><strong class="text-country">Қазақстан Республикасы</strong></div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Индекс</div>
+                        <div class="info-value"><strong class="text-index">020000</strong></div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Город</div>
+                        <div class="info-value"><strong class="text-city">Көкшетау</strong></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                © 2023 EduPath. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // СЛОВАРИ ДЛЯ ПЕРЕВОДА
+        const translations = {
+            kz: {
+                "welcome": "Қош келдіңіз!",
+                "welcomeSub": "Біз сізді біздің платформада көргенімізге қуаныштымыз",
+                "catalogBtn": "Каталог",
+                "whatsapp": "WhatsApp",
+                "coverText": "Мен — Дана Абдрахманова. Көпбалалы ана, жүздің сәулетті массажының шебері және әйелдердің трансформациясына жетесі. Әйелдерге ішкі тірегін, үйлесімді тауып, өмірін сүйіспеншілікке толтыруға көмектесемін, әлемде бақытты балалар көбейсін деп үміттенемін.",
+                "name": "Дана Абдрахманова",
+                "title": "Жүздің сәулетті массажының шебері",
+                "country": "Қазақстан Республикасы",
+                "index": "020000",
+                "city": "Көкшетау",
+                "brand": "@EduPath",
+                "description": "Білім беру платформасы",
+                "author": "Автор сайта",
+                "authorName": "@ERZHIGIT MANSUR",
+                "currentLang": "Қазақша"
+            },
+            ru: {
+                "welcome": "Добро пожаловать!",
+                "welcomeSub": "Мы рады видеть вас на нашей платформе",
+                "catalogBtn": "Каталог",
+                "whatsapp": "WhatsApp",
+                "coverText": "Я — Дана Абдрахманова. Многодетная мама, мастер осознанного скульптурного массажа лица и проводник женской трансформации. Помогаю женщинам находить внутреннюю опору, гармонию и наполнять свою жизнь любовью, чтобы в мире становилось больше счастливых детей.",
+                "name": "Дана Абдрахманова",
+                "title": "Мастер осознанного скульптурного массажа лица",
+                "country": "Қазақстан Республикасы",
+                "index": "020000",
+                "city": "Көкшетау",
+                "brand": "@EduPath",
+                "description": "Образовательная платформа",
+                "author": "Автор сайта",
+                "authorName": "@ERZHIGIT MANSUR",
+                "currentLang": "Русский"
+            },
+            en: {
+                "welcome": "Welcome!",
+                "welcomeSub": "We are glad to see you on our platform",
+                "catalogBtn": "Catalog",
+                "whatsapp": "WhatsApp",
+                "coverText": "I am Dana Abdrakhmanova. A mother of many children, a master of conscious sculptural facial massage and a guide to women's transformation. I help women find inner support, harmony and fill their lives with love so that there are more happy children in the world.",
+                "name": "Dana Abdrakhmanova",
+                "title": "Master of Conscious Sculptural Facial Massage",
+                "country": "Republic of Kazakhstan",
+                "index": "020000",
+                "city": "Kokshetau",
+                "brand": "@EduPath",
+                "description": "Educational Platform",
+                "author": "Site Author",
+                "authorName": "@ERZHIGIT MANSUR",
+                "currentLang": "English"
+            }
+        };
+
+        // СОЗДАНИЕ ЗОЛОТЫХ ЧАСТИЦ
+        function createParticles() {
+            const particlesContainer = document.getElementById('goldParticles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Случайная позиция
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // Случайная задержка анимации
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                
+                // Случайный размер
+                const size = Math.random() * 4 + 3;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // ФУНКЦИЯ СМЕНЫ ЯЗЫКА
+        function changeLanguage(lang) {
+            document.querySelectorAll('.text-welcome').forEach(el => {
+                el.textContent = translations[lang].welcome;
+            });
+            
+            document.querySelectorAll('.welcome-subtext').forEach(el => {
+                el.textContent = translations[lang].welcomeSub;
+            });
+            
+            document.querySelectorAll('.text-catalog-btn').forEach(el => {
+                el.textContent = translations[lang].catalogBtn;
+            });
+            
+            document.querySelectorAll('.text-whatsapp').forEach(el => {
+                el.textContent = translations[lang].whatsapp;
+            });
+            
+            document.querySelectorAll('.text-cover').forEach(el => {
+                el.textContent = translations[lang].coverText;
+            });
+            
+            document.querySelectorAll('.text-name').forEach(el => {
+                el.textContent = translations[lang].name;
+            });
+            
+            document.querySelectorAll('.text-title').forEach(el => {
+                el.textContent = translations[lang].title;
+            });
+            
+            // Обновляем информацию в футере
+            document.querySelectorAll('.text-country').forEach(el => {
+                el.textContent = translations[lang].country;
+            });
+            
+            document.querySelectorAll('.text-index').forEach(el => {
+                el.textContent = translations[lang].index;
+            });
+            
+            document.querySelectorAll('.text-city').forEach(el => {
+                el.textContent = translations[lang].city;
+            });
+            
+            document.querySelectorAll('.text-brand').forEach(el => {
+                el.textContent = translations[lang].brand;
+            });
+            
+            document.querySelectorAll('.text-description').forEach(el => {
+                el.textContent = translations[lang].description;
+            });
+            
+            // Обновляем информацию об авторе
+            document.querySelectorAll('.text-author').forEach(el => {
+                el.textContent = translations[lang].author;
+            });
+            
+            document.querySelectorAll('.text-author-name').forEach(el => {
+                el.textContent = translations[lang].authorName;
+            });
+            
+            // Обновляем текущий язык в кнопке
+            document.querySelectorAll('.text-lang').forEach(el => {
+                el.textContent = translations[lang].currentLang;
+            });
+            
+            document.documentElement.lang = lang;
+            
+            // Обновляем активную кнопку в выпадающем списке
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        // ПЕРЕКЛЮЧЕНИЕ ЯЗЫКОВ
+        document.querySelectorAll('.lang-option').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                changeLanguage(lang);
+                document.getElementById('langDropdown').classList.remove('active');
+            });
+        });
+
+        // ОТКРЫТИЕ/ЗАКРЫТИЕ ВЫПАДАЮЩЕГО СПИСКА
+        document.getElementById('langTrigger').addEventListener('click', function(e) {
+            e.stopPropagation();
+            document.getElementById('langDropdown').classList.toggle('active');
+        });
+
+        // ЗАКРЫТИЕ ВЫПАДАЮЩЕГО СПИСКА ПРИ КЛИКЕ ВНЕ ЕГО
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.lang-switcher')) {
+                document.getElementById('langDropdown').classList.remove('active');
+            }
+        });
+
+        // АНИМАЦИЯ ПРИВЕТСТВИЯ
+        function startWelcomeAnimation() {
+            createParticles();
+            
+            // Ждем 3 секунды и скрываем приветствие
+            setTimeout(function() {
+                const welcomeOverlay = document.getElementById('welcomeOverlay');
+                welcomeOverlay.classList.add('hidden');
+                
+                // Удаляем элемент из DOM после анимации
+                setTimeout(function() {
+                    welcomeOverlay.style.display = 'none';
+                }, 1500);
+            }, 3000);
+        }
+
+        // ЗАПУСК АНИМАЦИИ ПРИ ЗАГРУЗКЕ
+        window.addEventListener('load', startWelcomeAnimation);
+
+        // УСТАНАВЛИВАЕМ РУССКИЙ ЯЗЫК ПО УМОЛЧАНИЮ
+        changeLanguage('ru');
+
+        // ДОБАВЛЯЕМ ВОЗМОЖНОСТЬ ПРОПУСТИТЬ ПРИВЕТСТВИЕ ПО КЛИКУ
+        document.getElementById('welcomeOverlay').addEventListener('click', function() {
+            this.classList.add('hidden');
+            setTimeout(() => {
+                this.style.display = 'none';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
